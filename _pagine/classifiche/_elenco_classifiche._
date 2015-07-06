@@ -1,0 +1,28 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+$titolo="Classifiche rock, pop, elettronica";
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+$contenitore=M::modulo("box",array("flag"=>"C","titolo"=>"Classifiche per anno","class"=>"elencoclassifiche"));
+for($anno=$_ANNO_CLASSIFICHE;$anno>$_ANNO_CLASSIFICHE-6;$anno--)
+	M::carica(
+		M::carica($contenitore,"<a href='/classifiche/$anno/'><strong>Classifica $anno</strong></a>"),
+		"SELECT sdmt_recensioni.url,((voto+IFNULL(media,voto))/2) AS voto,IFNULL(numerovoti,0) AS numvoti FROM sdmt_recensioni LEFT JOIN (SELECT ID_obj,COUNT(value)AS numerovoti,AVG(value) AS media FROM sdmt_voti_new WHERE ID_user NOT IN("._CONFIG_VOTE_BAN_LIST.") GROUP BY ID_obj)AS sdmt_voti ON sdmt_voti.ID_obj=sdmt_recensioni.ID WHERE sdmt_recensioni.data_disco='$anno' AND active=1 ORDER BY voto DESC, numvoti DESC, data LIMIT 10",
+		'<img src="{img,r,120,{url}}">');
+$anni="<option value=''>Scegli un anno</option>";
+foreach(db::query("SELECT * FROM (SELECT data_disco,COUNT(ID)AS n FROM sdmt_recensioni WHERE active=1 GROUP BY data_disco)AS x WHERE n>2 ORDER BY data_disco DESC")->righe()as $riga)
+	$anni.="<option value='{$riga["data_disco"]}'>Classifica {$riga["data_disco"]} ({$riga["n"]} dischi)</option>";
+M::carica($contenitore,"<div><select id='select_classifiche_anno' class='bottone'>$anni</select></div>");
+$contenitore=M::modulo("box",array("flag"=>"R","titolo"=>"Le classifiche dei recensori","class"=>"elencoclassifiche"));
+foreach(db::query("SELECT anno FROM sdmt_classifica_anno WHERE anno<2015 GROUP BY anno ORDER BY anno DESC LIMIT 3")->righe() as $riga)
+	M::carica(
+		M::carica($contenitore,"<a href='/classifiche/recensori/{$riga["anno"]}/'><strong>Recensori {$riga["anno"]}</strong></a>"),
+		"SELECT sdmt_recensioni.url,sum(sdmt_classifica_anno.voto) AS tot FROM sdmt_classifica_anno JOIN sdmt_recensioni ON sdmt_recensioni.ID=sdmt_classifica_anno.recensione_id where anno={$riga["anno"]} GROUP BY recensione_id ORDER BY tot DESC LIMIT 10",
+		'<img src="{img,r,120,{url}}">');
+M::carica($contenitore,"<a href='/classifiche/recensori.html' id='tutte_classifiche_recensori' class='bottone'>Vedi tutte le classifiche dei recensori</a>");
+$contenitore=M::modulo("box",array("flag"=>"S","titolo"=>"Classifiche speciali","class"=>"elencoclassifiche"));
+M::carica($contenitore,"<a href='/classifiche/speciali/133-dischi-indispensabili.html' class='indipendente'><img src='/static/img/133dischi.jpg' width='487' height='78' alt='I 133 dischi indispensabili del decennio 2000-2009'></a>");
+M::carica(
+	M::carica($contenitore,"<a href='/classifiche/speciali/bottom-ten.html'><strong>I 10 peggiori dischi</strong></a>"),
+	"SELECT sdmt_recensioni.url,((voto+IFNULL(media,voto))/2) AS voto,IFNULL(numerovoti,0) AS numvoti FROM sdmt_recensioni LEFT JOIN (SELECT ID_obj,COUNT(value)AS numerovoti,AVG(value) AS media FROM sdmt_voti_new WHERE ID_user NOT IN("._CONFIG_VOTE_BAN_LIST.") GROUP BY ID_obj)AS sdmt_voti ON sdmt_voti.ID_obj=sdmt_recensioni.ID WHERE active=1 ORDER BY voto ASC, numvoti DESC, data DESC LIMIT 10",
+	'<img src="{img,r,120,{url}}">');

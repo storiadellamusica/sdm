@@ -1,0 +1,22 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*
+
+	Seconda e terza colonna standar per riempire le pagine secondarie
+
+*/
+/*! Seconda colonna */
+/*! 	Goldies */
+M::modulo("goldies");
+/*! 	Ken Burns articoli */
+M::modulo("kenburns articoli");
+/*! 	Ultime recensioni */
+M::modulo("ultime recensioni",array("quante"=>9));
+/*! Terza colonna  */
+/*! 	Ken Burns news */
+M::modulo("kenburns news");
+/*! 	Bottoni invia, facebook, rss... */
+M::modulo("call to action");
+/*! 	Ultimi commenti */
+M::modulo("ultimi commenti");
+/*! 	Ultime dal forum */
+M::modulo("ultime dal forum");

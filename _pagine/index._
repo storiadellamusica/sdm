@@ -1,0 +1,46 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+M::accendi("tre_colonne");
+/*! Corpo principale */
+/*! 	Rullo */
+M::modulo("rullo");
+/*! 	Amazon */
+/*
+M::carica(
+	M::modulo("box",array("flag"=>"M","titolo"=>"Musica in mp3","id"=>"amazonmp3")),
+	'<iframe src="http://rcm-it.amazon.it/e/cm?t=storiadellamu-21&o=29&p=26&l=ur1&category=mp3&banner=1HE0C7NNR8QFW92DA202&f=ifr" width="468" height="60" scrolling="no" border="0" marginwidth="0" style="border:none; margin: 2px auto 1px auto;display:block;" frameborder="0"></iframe>');
+*/
+/*! 	Nuove recensioni */
+
+//aggiustamento temporaneo
+$_ANNO_CLASSIFICHE=2014;
+
+M::carica(
+	M::modulo("box",array("flag"=>"R","titolo"=>"Recensioni nuove uscite","id"=>"nuoveuscite","class"=>"elencorecensioni")),
+	"SELECT sdml_artista.Artista,sdmt_recensioni.voto,sdmt_recensioni.Titolo_Disco,sdmt_recensioni.Etichetta,sdmt_recensioni.data_disco,sdmt_recensioni.Text,sdmt_recensioni.ID,sdmt_recensioni.url FROM sdmt_recensioni JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE active=1 AND data_disco>=$_ANNO_CLASSIFICHE ORDER BY Data DESC, ID DESC LIMIT 9",
+	'<a href="{linka,r{url}}"><img src="{img,r,90,{url}}" alt="{s,{Titolo_Disco}}">{stelle,{voto}}<h2>{s,{Artista}}<div>{s,{Titolo_Disco}} ({s,{Etichetta}} {data_disco})</div></h2>{Text,160}</a>');
+/*! Seconda colonna */
+/*! 	Goldies */
+M::modulo("goldies");
+/*! 	Ken Burns articoli */
+M::modulo("kenburns articoli");
+/*! 	Call to action */
+M::carica(_COLONNA2,'<br><a href="/sys/admin/new_recensione_bozza.php"><img src="'._URL_MEDIA.'bnr/manda-una-recensione.jpg" alt="Manda una recensione"></a>');
+/*! 	Oldies */
+M::carica(
+	M::carica(_COLONNA2,'<h2>Oldies:</h2><div class="elencorecensioni"></div>'),
+	"SELECT * FROM ((SELECT recensioni.*,COUNT(commenti.ID_Obj) AS punteggio FROM
+(SELECT sdmt_recensioni.ID,sdmt_recensioni.Titolo_Disco,sdmt_recensioni.data_disco,sdmt_recensioni.Etichetta,sdmt_recensioni.url,sdml_artista.Artista,sdmt_recensioni.Data FROM sdmt_recensioni JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE active=1 AND data_disco<$_ANNO_CLASSIFICHE ORDER BY Data DESC, ID DESC LIMIT 7) AS recensioni
+JOIN sdmt_comments AS commenti ON commenti.ID_Obj=recensioni.ID GROUP BY commenti.ID_Obj)
+UNION
+(SELECT sdmt_recensioni.ID,sdmt_recensioni.Titolo_Disco,sdmt_recensioni.data_disco,sdmt_recensioni.Etichetta,sdmt_recensioni.url,sdml_artista.Artista,sdmt_recensioni.Data,0 AS punteggio FROM sdmt_recensioni JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE active=1 AND data_disco<$_ANNO_CLASSIFICHE ORDER BY Data DESC, ID DESC LIMIT 7)) AS tutte GROUP BY ID
+ORDER BY punteggio DESC, Data DESC, ID DESC",
+	'<a href="{linka,r{url}}"><img src="{img,r,50,{url}}" alt="{s,{Titolo_Disco}}"><strong>{s,{Artista}}</strong> {s,{Titolo_Disco}}</a>');
+/*! Terza colonna  */
+/*! 	Ken Burns news */
+M::modulo("kenburns news");
+/*! 	Bottoni invia, facebook, rss... */
+M::modulo("call to action");
+/*! 	Ultimi commenti */
+M::modulo("ultimi commenti");
+/*! 	Ultime dal forum */
+M::modulo("ultime dal forum");

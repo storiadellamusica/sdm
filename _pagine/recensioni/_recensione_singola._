@@ -1,0 +1,102 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*! Caricamento dati e inizializzazione */
+if($_PARAMETRI[0]=="anteprima")define("ANTEPRIMA",true);
+if($_PARAMETRI[0]=="minianteprima")define("ANTEPRIMA",true);
+$id=end($_PARAMETRI);
+$dati=db::query("SELECT
+sdmt_recensioni.ID AS id,
+sdmt_recensioni.Titolo_Disco AS disco,
+sdmt_recensioni.Artista AS id_artista,
+generi1.padre AS padre1,
+generi1.Genere AS genere1,
+sdmt_recensioni.Genere1 AS id_genere1,
+generi2.padre AS padre2,
+generi2.Genere AS genere2,
+sdmt_recensioni.Genere2 AS id_genere2,
+generi3.padre AS padre3,
+generi3.Genere AS genere3,
+sdmt_recensioni.Genere3 AS id_genere3,
+sdmt_recensioni.kws AS keywords,
+sdmt_recensioni.Text AS testo,
+sdmt_recensioni.voto AS voto,
+sdmt_recensioni.Etichetta AS etichetta,
+sdmt_recensioni.data_disco AS anno,
+sdml_recensore.ID_user AS id_recensore,
+sdml_recensore2.ID_user AS id_recensore2,
+sdmt_recensioni.Recensore AS id_recensore_alias,
+sdmt_recensioni.Recensore2 AS id_recensore2_alias,
+sdml_recensore.Recensore AS nome_recensore,
+sdml_recensore2.Recensore AS nome_recensore2,
+phpbb_users.username AS nick_recensore,
+phpbb_users2.username AS nick_recensore2,
+sdmt_recensioni.tracks AS tracce,
+sdmt_recensioni.myspace AS myspace,
+sdmt_recensioni.homepage AS homepage,
+sdmt_recensioni.terzolinktesto AS titololink,
+sdmt_recensioni.terzolink AS link,
+sdmt_recensioni.youtube AS youtube,
+sdmt_recensioni.itms_album_id AS itunes,
+sdml_artista.Artista AS artista,
+sdml_artista.url AS url_artista,
+sdmt_recensioni.Mailto AS iscritti
+FROM sdmt_recensioni
+LEFT JOIN sdml_artista ON sdml_artista.ID=sdmt_recensioni.Artista
+LEFT JOIN sdml_recensore ON sdml_recensore.ID=sdmt_recensioni.Recensore
+LEFT JOIN sdml_recensore AS sdml_recensore2 ON sdml_recensore2.ID=sdmt_recensioni.Recensore2
+LEFT JOIN sdml_generi AS generi1 ON generi1.ID=sdmt_recensioni.Genere1
+LEFT JOIN sdml_generi AS generi2 ON generi2.ID=sdmt_recensioni.Genere2
+LEFT JOIN sdml_generi AS generi3 ON generi3.ID=sdmt_recensioni.Genere3
+LEFT JOIN phpbb_users ON sdml_recensore.ID_user=phpbb_users.user_id
+LEFT JOIN phpbb_users AS phpbb_users2 ON sdml_recensore2.ID_user=phpbb_users2.user_id
+WHERE ".(defined("ANTEPRIMA")?"sdmt_recensioni.ID=$id":"sdmt_recensioni.active=1 AND sdmt_recensioni.url LIKE '%/$id'"))->riga();
+if(!$dati)require _404;
+M::accendi("tre_colonne");
+/*! Metadati e title */
+M::titolo("Recensione: ".$dati["artista"]." - ".$dati["disco"]);
+M::titolofacebook($dati["artista"]." - ".$dati["disco"]);
+M::descrizione($dati["testo"]);
+M::keyword($dati["keywords"]);
+M::immagine(img("r",400,$id));
+/*! Video */
+if($dati["youtube"]!="")M::modulo("youtube",array("video"=>explode(",",$dati["youtube"]),"dove"=>M::modulo("box",array("flag"=>"V","titolo"=>"Video","class"=>"video"))));
+/*! Recensione */
+M::carica(M::modulo("box",array("flag"=>"R","titolo"=>"Recensione")),'<article class="corpo_recensione" itemscope itemtype="http://data-vocabulary.org/Review">'.stelle($dati["voto"]).'<h1 itemprop="itemreviewed"><a href="'.linka("x".$dati["url_artista"]).'">'.$dati["artista"]."</a></h1><h2>{$dati["disco"]}</h2><div class='autore'>di <a href='".linka("u".$dati["nick_recensore"])."' itemprop='reviewer'>{$dati["nome_recensore"]}</a>".($dati["id_recensore2_alias"]?" e <a href='".linka("u".$dati["nick_recensore2"])."'>{$dati["nome_recensore2"]}</a>":"")."</div>".spotyplay($dati["artista"],$dati["disco"]).riformatta($dati["testo"]).M::modulo("twitta").M::modulo("facebook like").'</article>');
+/*! Tracce */
+$generi="";
+for($i=1;$i<4;$i++)
+	if($dati["id_genere$i"])$generi.='<a href="/'.url_genere($dati["padre$i"])."/".urlizza($dati["genere$i"]).'/">'.$dati["genere$i"].'</a> ';
+if(!empty($generi))$generi="<div class='generi'>$generi</div>";
+$tracce="";
+foreach(M::modulo("tracce",array("dati"=>$dati))as $traccia)
+	if(is_string($traccia["track"]))$tracce.="<li".(0&&isset($traccia["preview_url"])?" data-preview='{$traccia["preview_url"]}'":"").">{$traccia["track"]}</li>";
+if(!empty($tracce))$tracce="<ol id='tracce_disco'>$tracce</ol>";
+$amazon_link=_amazon_link($dati["artista"],$dati["disco"]);
+preg_match("#href='([^']*)'#",$amazon_link,$amazon_link_estratto);
+$amazon_link_estratto=count($amazon_link_estratto)>1?$amazon_link_estratto[1]:"";
+$siti=(empty($dati["myspace"])?"":'<a href="'.$dati["myspace"].'" target="_blank">MySpace</a>').(empty($dati["homepage"])?"":'<a href="'.$dati["homepage"].'" target="_blank">Sito ufficiale</a>').(empty($dati["titololink"])||empty($dati["link"])?"":'<a href="'.$dati["link"].'" target="_blank">'.entita($dati["titololink"]).'</a>');
+$siti="<div class='collegamenti'>$siti $amazon_link</div>";
+M::carica(M::carica(_COLONNA3,"<h2>Informazioni sul disco:</h2><div class='info_disco'></div>"),'<a href="'.$amazon_link_estratto.'" class="cover"><img src="'.(defined("ANTEPRIMA")?imga("r",$id):img("r",150,$id)).'" alt="'.entita($dati["disco"]).'"></a><h3><a href="'.linka("e".urlizza($dati["etichetta"])).'" class="etichetta">'.$dati["etichetta"]."</a> <a href='/recensioni/".$dati["anno"]."/' class='anno'>".$dati["anno"]."</a></h3>$generi$siti".$tracce);
+M::modulo("call to action");
+M::modulo("box facebook");
+/*! Dello stesso artista */
+$discografia=db::query("SELECT sdmt_recensioni.Titolo_Disco,sdmt_recensioni.url,sdml_artista.Artista FROM sdmt_recensioni JOIN sdml_artista ON sdml_artista.ID=sdmt_recensioni.Artista WHERE sdmt_recensioni.active=1 AND sdmt_recensioni.Artista={$dati["id_artista"]} AND sdmt_recensioni.ID!={$dati["id"]} ORDER BY data_disco LIMIT 10")->righe();
+if($discografia){
+	$tmp="";
+	foreach($discografia as $d)
+		$tmp.='<a href="'.linka("r".$d["url"]).'"><img src="'.img("r",25,$d["url"]).'"><strong>'.$d["Artista"].'</strong> '.$d["Titolo_Disco"].'</a>';
+	M::carica(_COLONNA3,"<h2>Dello stesso artista:</h2><div class='dellostessoartista'>$tmp</div>");
+}
+/*! Dello stesso recensore */
+if($dati["id_recensore2_alias"]){
+	M::modulo("dello stesso autore",array("id"=>"r".$dati["id"],"autore"=>$dati["id_recensore_alias"],"nome"=>$dati["nome_recensore"],"max"=>5));
+	M::modulo("dello stesso autore",array("id"=>"r".$dati["id"],"autore"=>$dati["id_recensore2_alias"],"nome"=>$dati["nome_recensore2"],"max"=>5));	
+}else
+	M::modulo("dello stesso autore",array("id"=>"r".$dati["id"],"autore"=>$dati["id_recensore_alias"],"nome"=>$dati["nome_recensore"]));
+/*! Potrebbero interessarti */
+M::carica(M::carica(_COLONNA2,'<h2>Potrebbero interessarti:</h2><div class="elencorecensioni"></div>'),
+	M::modulo("collegati",array("id"=>$dati["id"],"keywords"=>$dati["artista"].",".$dati["disco"].",".str_replace(", ",",",$dati["keywords"])))
+	);
+/*! Voti */
+$votiutenti=M::modulo("voti",array("id"=>$dati["id"]));
+/*! Commenti */
+M::modulo("commenti",array("sezione"=>"r","id"=>$dati["id"],"votiutenti"=>$votiutenti,"autore"=>$dati["id_recensore"],"autore2"=>$dati["id_recensore2"],"iscritti"=>$dati["iscritti"],"titolo"=>$dati["artista"]." - ".$dati["disco"]));

@@ -1,0 +1,50 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+define("DISCHI_PER_PAGINA",10);
+$anno=$_PARAMETRI[1];
+$totali=db::query("SELECT COUNT(*) FROM sdmt_classifica_anno WHERE selected=1 AND anno=$anno ")->valore();
+$pagine_totali=ceil($totali/DISCHI_PER_PAGINA);
+if($pagine_totali<$_NUMERO_PAGINA)require _404;
+$titolo="Classifica $anno dei recensori (pagina ".$_NUMERO_PAGINA." di ".$pagine_totali.")";
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+$contenitore=M::modulo("box",array("flag"=>"R","titolo"=>$titolo,"class"=>"elencorecensioni"));
+M::modulo("navigatore",array("dove"=>$contenitore,"pagine_totali"=>$pagine_totali));
+$posizione=$totali-($_NUMERO_PAGINA-1)*DISCHI_PER_PAGINA;
+function contatore(){
+	return $GLOBALS["posizione"]--;
+}
+M::carica(
+	$contenitore,
+	"SELECT
+sdmt_recensioni.url,
+sdmt_recensioni.Titolo_Disco,
+sdml_artista.Artista,
+sdmt_recensioni.Etichetta,
+sdmt_recensioni.data_disco,
+sdmt_classifica_anno.Commento,
+voti.tot
+FROM sdmt_classifica_anno
+JOIN (SELECT SUM(voto) AS tot,recensione_id AS id FROM sdmt_classifica_anno GROUP BY recensione_id) AS voti ON voti.id=sdmt_classifica_anno.recensione_id
+JOIN sdmt_recensioni ON sdmt_recensioni.ID=sdmt_classifica_anno.recensione_id
+JOIN sdml_artista ON sdml_artista.ID=sdmt_recensioni.Artista
+WHERE sdmt_classifica_anno.selected=1 AND sdmt_classifica_anno.anno=$anno GROUP BY sdmt_classifica_anno.recensione_id ORDER BY tot LIMIT ".(($_NUMERO_PAGINA-1)*DISCHI_PER_PAGINA).",".DISCHI_PER_PAGINA,
+	'<a href="{linka,r{url}}"><img src="{img,r,90,{url}}" alt="{s,{Titolo_Disco}}"><h2>{contatore,x}. {s,{Artista}}<div>{s,{Titolo_Disco}} ({s,{Etichetta}} {data_disco})</div></h2>{s,{Commento}}</a>');
+/*
+M::carica(
+	M::modulo("box",array("flag"=>"V","titolo"=>"Hanno votato","class"=>"tuttapagina hannovotato")),
+	"SELECT sdml_recensore.Recensore,sdml_recensore.ID_user FROM sdmt_classifica_anno JOIN sdml_recensore ON sdmt_classifica_anno.recensore_id=sdml_recensore.ID WHERE sdmt_classifica_anno.anno=$anno GROUP BY sdmt_classifica_anno.recensore_id ORDER BY sdml_recensore.Recensore",
+	'<a href="/classifiche/'.$anno.'/{rawurldecode,{Recensore}.html}"><img src="{img,u,25,{ID_user}}">{Recensore}</a>');
+*/
+
+
+if($anno==2012)
+	M::carica(
+		M::modulo("box",array("flag"=>"V","titolo"=>"Hanno votato","class"=>"tuttapagina hannovotato")),
+		"SELECT sdml_recensore.Recensore,sdml_recensore.ID_user FROM sdmt_classifica_anno JOIN sdml_recensore ON sdmt_classifica_anno.recensore_id=sdml_recensore.ID WHERE sdmt_classifica_anno.anno=$anno AND recensore_id!=146 GROUP BY sdmt_classifica_anno.recensore_id ORDER BY sdml_recensore.Recensore",
+		'<a href="/classifiche/'.$anno.'/{rawurldecode,{Recensore}.html}"><img src="{img,u,25,{ID_user}}">{Recensore}</a>');
+else
+	M::carica(
+		M::modulo("box",array("flag"=>"V","titolo"=>"Hanno votato","class"=>"tuttapagina hannovotato")),
+		"SELECT sdml_recensore.Recensore,sdml_recensore.ID_user FROM sdmt_classifica_anno JOIN sdml_recensore ON sdmt_classifica_anno.recensore_id=sdml_recensore.ID WHERE sdmt_classifica_anno.anno=$anno GROUP BY sdmt_classifica_anno.recensore_id ORDER BY sdml_recensore.Recensore",
+		'<a href="/classifiche/'.$anno.'/{rawurldecode,{Recensore}.html}"><img src="{img,u,25,{ID_user}}">{Recensore}</a>');

@@ -1,0 +1,23 @@
+<?php
+$_DEFINIZIONI_VOTI=array(
+20=>"Patrimonio dell'umanit&agrave;",
+19=>"Fondamentale",
+18=>"Capolavoro",
+17=>"Superlativo",
+16=>"Eccellente",
+15=>"Ottimo",
+14=>"Buono",
+13=>"Appagante",
+12=>"Discreto",
+11=>"Mediocre",
+10=>"Modesto",
+9=>"Misero",
+8=>"Deludente",
+7=>"Scarso",
+6=>"Bruttissimo",
+5=>"Sgradevole",
+4=>"Inascoltabile",
+3=>"Odioso",
+2=>"Presa per il c...",
+1=>"?"
+);

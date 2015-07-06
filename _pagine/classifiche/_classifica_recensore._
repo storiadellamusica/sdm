@@ -1,0 +1,25 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+$anno=$_PARAMETRI[0];
+$recensore=str_replace(".html","",end(explode("/",_URL)));
+$recensoreid=db::query("SELECT ID FROM sdml_recensore WHERE Recensore='".addslashes($recensore)."'")->valore();
+if(empty($recensoreid))require _404;
+$titolo="Classifica $anno di ".entita($recensore);
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+M::carica(
+	M::modulo("box",array("flag"=>"R","titolo"=>$titolo,"class"=>"elencorecensioni")),
+	"SELECT
+sdmt_recensioni.url,
+sdmt_recensioni.Titolo_Disco,
+sdml_artista.Artista,
+sdmt_recensioni.Etichetta,
+sdmt_recensioni.data_disco,
+sdmt_classifica_anno.Commento,
+sdmt_classifica_anno.voto,
+(11-sdmt_classifica_anno.voto) AS posizione
+FROM sdmt_classifica_anno
+JOIN sdmt_recensioni ON sdmt_recensioni.ID=sdmt_classifica_anno.recensione_id
+JOIN sdml_artista ON sdml_artista.ID=sdmt_recensioni.Artista
+WHERE sdmt_classifica_anno.recensore_id=$recensoreid  AND sdmt_classifica_anno.anno=$anno GROUP BY sdmt_classifica_anno.voto ORDER BY voto",
+	'<a href="{linka,r{url}}"><img src="{img,r,90,{url}}" alt="{s,{Titolo_Disco}}"><h2>{posizione}. {s,{Artista}}<div>{s,{Titolo_Disco}} ({s,{Etichetta}} {data_disco})</div></h2>{s,{Commento}}</a>');

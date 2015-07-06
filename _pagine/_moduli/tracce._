@@ -1,0 +1,35 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*
+
+	Restituisce i dati sulle tracce di un disco. Utilizza i seguenti parametri:
+	-	dati: un array contente i dati del disco
+
+*/
+$tracce=db::query("SELECT track,num,preview_url FROM sdmt_tracks WHERE recensione_id={$dati["id"]} ORDER BY num")->righe();
+if(!$tracce&&!empty($dati["itunes"])){
+	$itunes=new itunes();
+	$itunesTracks=$itunes->getFullTracklist($dati['artista']." ".$dati['disco'],$dati["itunes"]);
+	if(!empty($itunesTracks)){
+		foreach($itunesTracks as $num=>$ituneTrack)
+			db::query("INSERT INTO sdmt_tracks SET
+				artista_id={$dati['id_artista']},
+				recensione_id={$dati["id"]},
+				itms_album_id={$ituneTrack->collectionId},
+				itms_track_id={$ituneTrack->trackId},
+				itms_artist_id={$ituneTrack->artistId},
+				track='".mysql_real_escape_string(utf8_decode($ituneTrack->trackName))."',
+				artist='".mysql_real_escape_string(utf8_decode($ituneTrack->artistName))."',
+				album='".mysql_real_escape_string(utf8_decode($ituneTrack->collectionName))."',
+				preview_url='".mysql_real_escape_string($ituneTrack->previewUrl)."',
+				num={$num}");
+		$tracce=db::query("SELECT track,num,preview_url FROM sdmt_tracks WHERE recensione_id={$dati["id"]} ORDER BY num")->righe();
+	}	
+}
+if(!$tracce){
+	$tracce=array();
+	$n=1;
+	if(is_array($t=unserialize($dati['tracce'])))
+		foreach($t as $traccia)
+			$tracce[]=array('track'=>$traccia,'num'=>$n++);
+}
+$return=$tracce;

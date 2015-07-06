@@ -1,0 +1,16 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*
+
+	Inserisce i bottoni
+	-	dove: un selettore TLAB opzionale, viene di default inserito nella terza colonna
+
+*/
+M::carica(isset($dove)?$dove:_COLONNA3,'<a href="http://www.storiadellamusica.it/user" class="calltoaction check">Invia un comunicato</a>
+	<a href="http://www.storiadellamusica.it/user" class="calltoaction check">Invia una news</a>
+	<a href="http://www.storiadellamusica.it/bacheca.html" class="calltoaction check">Prenota una recensione</a>
+	<a href="http://www.storiadellamusica.it/sys/admin/new_recensione_bozza.php" class="calltoaction check">Invia una recensione</a>
+	<a href="http://www.storiadellamusica.it/sys/admin/new_articolo_bozza.php" class="calltoaction check">Invia un articolo</a>
+	<a href="http://www.storiadellamusica.it/redazione.html" class="calltoaction check">La redazione</a>
+	<a href="http://www.storiadellamusica.it/rss.xml" class="calltoaction rss">Abbonati a Storia</a>
+	<a href="https://twitter.com/SdMusica" target="_blank" class="calltoaction check twitter"><span>Storia su </span>twitter</a>
+	<a href="https://www.facebook.com/storiadellamusica" target="_blank" class="calltoaction check facebook"><span>Storia su </span>facebook</a>');

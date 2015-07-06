@@ -1,0 +1,15 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+define("NEWS_PER_PAGINA",11);
+$totali=db::query("SELECT COUNT(*) FROM sdmt_news WHERE pubblicato=1")->valore();
+$pagine_totali=ceil($totali/NEWS_PER_PAGINA);
+if($pagine_totali<$_NUMERO_PAGINA)require _404;
+$titolo="Musica novit&agrave; e uscite discografiche";
+M::accendi("tre_colonne");
+M::titolo("Ultime uscite canzoni - uscite musicali");
+M::modulo("colonne standard");
+$contenitore=M::modulo("box",array("flag"=>"N","titolo"=>$titolo,"class"=>"elenconews"));
+M::modulo("navigatore",array("dove"=>$contenitore,"pagine_totali"=>$pagine_totali));
+M::carica(
+	$contenitore,
+	"SELECT user_nome,titolo,data,id,testo FROM sdmt_news LEFT JOIN phpbb_users ON user_id=id_autore WHERE pubblicato=1 ORDER BY data DESC,modificata DESC LIMIT ".(($_NUMERO_PAGINA-1)*NEWS_PER_PAGINA).",".NEWS_PER_PAGINA,
+	'<a href="/news/3{id}/{formattadata_news,{data}}-{urlizza,{titolo}}.html"><img src="{img,n,90,{id}}" alt="{s,{titolo}}"><h2>{substr,{data},6,2}/{substr,{data},4,2}/{substr,{data},0,4} // {s,{titolo}}</h2><strong>di {user_nome}</strong>{testo,100} <em>&raquo;</em></a>');

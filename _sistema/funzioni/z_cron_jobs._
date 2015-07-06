@@ -1,0 +1,32 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*
+	
+	Routine di manutenzione eseguire periodicamente, da spostare in futuro in uno script cronjob.
+	
+*/
+
+// aggiorna i campi url del database, da eliminare quando verrà sistemato il backend
+$d=new db();
+// aggiorna gli url di sdmt_recensioni
+$d->query("UPDATE sdmt_recensioni SET genere1=genere2,genere2=genere3,genere3=0 WHERE genere1=0");
+foreach($d->query("SELECT sdml_generi.Genere,sdml_generi.padre,sdmt_recensioni.ID,data_disco AS Anno,Etichetta,Titolo_Disco AS Titolo,sdml_artista.Artista AS Artista FROM sdmt_recensioni JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID JOIN sdml_generi ON sdml_generi.ID=sdmt_recensioni.Genere1 WHERE sdmt_recensioni.url='' AND sdmt_recensioni.active=1 AND sdmt_recensioni.Genere1!=0")->righe()as $a)
+ 	$d->query("UPDATE sdmt_recensioni SET url='".url_genere($a["padre"])."/".urlizza($a["Genere"])."/".urlizza($a["Artista"])."-".urlizza($a["Titolo"])."(".urlizza($a["Etichetta"])."-".$a["Anno"].")"."' WHERE ID=".$a["ID"]);
+// aggiorna gli url delle etichette di sdmt_recensioni
+foreach($d->query("SELECT ID,Etichetta FROM sdmt_recensioni WHERE active=1 AND url_etichetta=''")->righe()as $a)
+ 	$d->query("UPDATE sdmt_recensioni SET url_etichetta='".urlizza($a["Etichetta"])."' WHERE ID=".$a["ID"]);
+// aggiorna gli url di sdmt_articoli
+foreach($d->query("SELECT ID,Titolo FROM sdmt_articoli WHERE active=1 AND url=''")->righe()as $a)
+ 	$d->query("UPDATE sdmt_articoli SET url='".urlizza($a["Titolo"])."' WHERE ID=".$a["ID"]);
+// aggiorna gli url di sdmt_capitoli
+foreach($d->query("SELECT ID,Titolo FROM sdmt_capitoli WHERE url=''")->righe()as $a)
+ 	$d->query("UPDATE sdmt_capitoli SET url='".urlizza($a["Titolo"])."' WHERE ID=".$a["ID"]);
+// aggiorna gli url di sdml_artista
+foreach($d->query("SELECT ID,Artista FROM sdml_artista WHERE url=''")->righe()as $a)
+ 	$d->query("UPDATE sdml_artista SET url='".urlizza($a["Artista"])."' WHERE ID=".$a["ID"]);
+// aggiorna gli url di sdmt_news
+function formattadata_news($a){return substr($a,6,2)."_".$GLOBALS["nomi_mesi"][substr($a,4,2)+0]."_".substr($a,0,4);}
+foreach($d->query("SELECT titolo,data,id FROM sdmt_news WHERE pubblicato=1 AND url=''")->righe()as $a)
+ 	$d->query("UPDATE sdmt_news SET url='3".$a["id"]."/".formattadata_news($a["data"])."-".urlizza($a["titolo"])."' WHERE id=".$a["id"]);
+//pubblicazione programmata delle recensioni
+$d->query("UPDATE sdmt_recensioni SET active=1 WHERE Data<NOW() AND active=2");
+unset($d);

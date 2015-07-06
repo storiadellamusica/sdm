@@ -1,0 +1,10 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*
+
+	Modulo per l'inserimento dei tre goldies nella seconda colonna
+
+*/
+M::carica(
+	M::carica(_COLONNA2,'<h2>Goldies:</h2><div class="elencorecensioni"></div>'),
+	"SELECT _goldies.*,sdmt_recensioni.Titolo_Disco,sdmt_recensioni.url,sdml_artista.Artista FROM _goldies JOIN sdmt_recensioni ON sdmt_recensioni.ID=_goldies.disco JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE _goldies.data<NOW() ORDER BY _goldies.data DESC,_goldies.id LIMIT 3",
+	'<a href="{linka,r{url}}"><img src="{img,r,50,{url}}" alt="{s,{Titolo_Disco}}"><strong>{s,{Artista}}</strong> {s,{Titolo_Disco}}</a>');

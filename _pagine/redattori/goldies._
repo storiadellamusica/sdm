@@ -1,0 +1,16 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+$titolo.="Goldies!";
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+$lista=DB::query("SELECT _goldies.data AS dal,sdml_artista.Artista,sdmt_recensioni.voto,sdmt_recensioni.Titolo_Disco,sdmt_recensioni.Etichetta,sdmt_recensioni.data_disco,sdmt_recensioni.Text,sdmt_recensioni.ID,sdmt_recensioni.url FROM _goldies JOIN sdmt_recensioni ON _goldies.disco=sdmt_recensioni.id JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE active=1 ORDER BY _goldies.data,_goldies.id")->righe();
+$max=count($lista)-1;
+$temp="";
+for($i=0;$i<=$max;$i++){
+	$temp.='<a href="'.linka("r".$lista[$i]["url"]).'"><img src="'.img("r",90,$lista[$i]["url"]).'" alt="'.s($lista[$i]["Titolo_Disco"]).'">'.stelle($lista[$i]["voto"]).'<h2>'.s($lista[$i]["Artista"]).'<div>'.s($lista[$i]["Titolo_Disco"]).' ('.s($lista[$i]["Etichetta"]).' '.$lista[$i]["data_disco"].')</div></h2>'.anteprimaTesto($lista[$i]["Text"],160).'</a>';
+	if($i==$max||$lista[$i]["dal"]!=$lista[$i+1]["dal"]){
+		$dal=explode("-",substr($lista[$i]["dal"],0,10));
+		M::carica(M::modulo("box",array("flag"=>"G","titolo"=>"dal ".($dal[2]==1?"primo":$dal[2]+0)." ".$nomi_mesi[$dal[1]+0]." ".$dal[0],"class"=>"elencorecensioni")),$temp);
+		$temp="";
+	}
+}

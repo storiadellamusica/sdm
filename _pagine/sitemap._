@@ -1,0 +1,41 @@
+<?php
+$statici=array(
+"",
+"articoli/",
+"artisti/",
+"avant_post_rock/",
+"cantautori/",
+"capitoli/",
+"classic_rock-psichedelia-wave/",
+"classifiche/",
+"colonne_sonore_soundtracks/",
+"contatti.html",
+"elettronica_grooves_dance/",
+"heavy_metal_hardcore_punk/",
+"hiphop-rnb-black/",
+"indie_pop/",
+"indie_rock/",
+"news/",
+"pop-music/",
+"recensioni/",
+"redazione.html",
+"soul-jazz/",
+"world_music/"
+);
+$dinamici=array(
+"SELECT CONCAT(url,'.html') FROM sdmt_recensioni WHERE active=1",
+"SELECT CONCAT('articoli/',url,'.html') FROM sdmt_articoli WHERE active=1",
+"SELECT CONCAT('artisti/',url,'.html') FROM sdml_artista",
+"SELECT CONCAT('capitoli/',url,'.html') FROM sdmt_capitoli",
+"SELECT CONCAT('classifiche/',anno,'/') FROM sdmt_classifica_anno GROUP BY anno",
+"SELECT CONCAT('news/',url,'.html') FROM sdmt_news"
+);
+header("Content-Type: text/xml;charset=utf-8");
+echo("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.google.com/schemas/sitemap/0.84\">");
+$data=date("Y-m-d");
+foreach($statici as $url)
+	echo("\n<url><loc>http://www.storiadellamusica.it/$url</loc><lastmod>$data</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>");
+foreach($dinamici as $query)
+	foreach(db::query($query)->valori()as $url)
+		echo("\n<url><loc>http://www.storiadellamusica.it/$url</loc><lastmod>$data</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>");
+echo("\n</urlset>");

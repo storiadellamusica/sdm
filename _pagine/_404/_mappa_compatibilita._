@@ -1,0 +1,61 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+ 
+// necessario per compatibilità con le vecchie pagine per un problema di configurazione del server:
+set_include_path(get_include_path().PATH_SEPARATOR.$_SERVER["DOCUMENT_ROOT"]);
+$_REGOLE=array(
+"chat.php(.*)"=>array( // non attivo, vedi web.config
+			"_file"=>'chat/chat.php'),
+"bacheca"=>array(
+			"_file"=>'bacheca_recensioni.php'),
+"(.+).a([0-9]+).html"=>array(
+			"_file"=>'index_artisti.php',
+			"ot"=>'$1',
+			"id"=>'$2'),
+"(.+).p([0-9]+)-[cs]([0-9]+)"=>array(
+			"_file"=>'capitolo.php',
+			"ot"=>'$1',
+			"page"=>'$2',
+			"ID"=>'$3'),
+"(.+).p([0-9]+)-r([0-9]+)"=>array(
+			"_file"=>'recensione.php',
+			"ot"=>'$1',
+			"page"=>'$2',
+			"ID"=>'$3'),
+"(.+).p([0-9]+)-a([0-9]+)"=>array(
+			"_file"=>'articolo.php',
+			"ot"=>'$1',
+			"page"=>'$2',
+			"ID"=>'$3')
+);
+foreach($_REGOLE as $regola=>$risultato){
+	if(preg_match("/$regola/",_URL,$valori)){
+		foreach($risultato as $id=>$valore)
+			$_GET[$id]=$valore[0]=="$"?$valori[substr($valore,1)]:$valore;
+		chdir(_ROOT);
+		include(_ROOT.$risultato["_file"]);
+		die;
+	}
+}
+
+$regole_301=array(
+"capitoli.([0-9]+).html"=>'capitoli/',
+"artisti-(.+).html"=>'artisti/',
+"genere-(.+).html"=>'recensioni/$1/',
+"search_(.*)"=>'?q=$1',
+"goto\/(.*)"=>'?q=$1',
+"recensioni-classici-([a-z]+)([0-9]*).html"=>'recensioni/oldies/',
+"recensioni-2000-([a-z]+)([0-9]*).html"=>'recensioni/oldies/',
+"recensioni-nuovi-dischi-([a-z])([0-9]+).html"=>'recensioni/2012/',
+"recensioni-.*"=>'recensioni/',
+"recensioni\..*"=>'recensioni/',
+"articoli.([0-9]+).html"=>'articoli/',
+"classifica-anno-([0-9]{4}).*"=>'classifiche/$1/',
+"classifiche-[^-]+-([0-9]{4}).*"=>'classifiche/$1/',
+"classifica_.*"=>'classifiche/'
+
+);
+foreach($regole_301 as $regola=>$pagina)
+	if(preg_match("#$regola#i",_URL))_301(preg_replace("#$regola#i",$pagina,_URL));
+if(db::query("SELECT user_id FROM phpbb_users WHERE username='".addslashes(_URL)."'")->valore())
+	_301("profilo/".rawurlencode(_URL));
+?>

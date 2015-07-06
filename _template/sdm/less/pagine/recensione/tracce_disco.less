@@ -1,0 +1,33 @@
+#tracce_disco{
+	padding-left: 25px;
+	padding-right: 5px;
+	font-size: 12px;
+	li[data-preview]{
+		cursor: pointer;
+		&::before{
+			content: "{";
+			font-family: EntypoRegular;
+			font-size: 36px;
+			line-height: 10px;
+			position: relative;
+			top:5px;
+			color: @testo;
+		}
+		&:hover{
+			color: @blu;
+			&::before{
+				color: @arancio;
+			}
+		}
+		&.playing{
+			&::before{
+				color:@arancio;
+			}
+			&:hover{
+				&::before{
+					content: "~";
+				}
+			}
+		}
+	}
+}

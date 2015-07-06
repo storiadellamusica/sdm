@@ -1,0 +1,10 @@
+<?php
+define("_DEFAULT_TITOLO","Storia della musica rock, pop, elettronica - Recensioni dischi - Classifiche");
+define("_DEFAULT_SUFFISSO_TITOLO"," - storiadellamusica.it");
+define("_DEFAULT_DESCRIZIONE","Storia della musica: l'unico sito che ti permette di leggere le recensioni, votarle e discuterle e di associarle ad una storia della musica che va da Elvis agli Strokes!");
+define("_DEFAULT_KEYWORDS","storia musica, musica rock, musica pop, musica elettronica");
+define("_DEFAULT_IMMAGINE","img/storia_della_musica.jpg");
+define("_FB_ADMINS","100000446105021");
+
+define("_CONFIG_VOTE_BAN_LIST","2811,589,2812,2982,2113,3001,2867,5149,5148,5147,5146,5143,3121,3227,3223,2550,3027,5156,4306,4599,4593,5150,4611,4273,5086,5096,5581,5582,5583,5584,5585,5671,5752,5739,5984,4636,6974,6975");
+define("_CONFIG_VOTE_SUPER_LIST","14,62,84,2832,173,177,142,130,1490,695,1817,2811,2822,3088,3145,3275,3524,3570,3612,3811,4181,3");

@@ -1,0 +1,23 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+$anno=isset($_PARAMETRI[0])?$_PARAMETRI[0]:2000;
+if($anno<2000||$anno>2009)require _404;
+$titolo="I 133 dischi indispensabili del decennio (anno $anno)";
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+$anni="";
+for($i=0;$i<10;$i++)
+	$anni.='<a href="/classifiche/speciali/133-dischi-indispensabili/200'.$i.'.html" class="bottone'.($anno==2000+$i?" disabled":"").'">0'.$i.'</a>';
+M::carica(M::modulo("box",array("flag"=>"C","titolo"=>"I 133 dischi indispensabili del decennio")),
+	"<img src='/static/img/133dischi.jpg' width='487' height='78' alt='I 133 dischi indispensabili del decennio 2000-2009'>$anni"
+);
+foreach(db::query("SELECT c.Titolo_Disco AS titolo,a.Artista AS artista,r.voto,r.Etichetta,r.Text,r.url AS recensione,c.img AS img,c.id AS idc,c.uscita AS anno FROM sdmt_classifica_decennio AS c JOIN sdml_artista AS a ON c.Artista=a.ID LEFT JOIN sdmt_recensioni AS r ON c.recensione_id=r.ID WHERE c.uscita=$anno ORDER BY c.uscita,c.Titolo_Disco DESC")->righe() as $disco){
+	$contenitore=M::modulo("box",array("flag"=>"R","titolo"=>$disco["titolo"],"class"=>"elencorecensioni"));
+	M::carica($contenitore,
+		$disco["recensione"]?'<a href="'.linka("r".$disco["recensione"]).'"><img src="'.img("r",90,$disco["recensione"]).'" alt="'.s($disco["titolo"]).'">'.stelle($disco["voto"]).'<h1>'.s($disco["artista"]).'<div>'.s($disco["titolo"]).' ('.s($disco["Etichetta"]).' '.$disco["anno"].')</div></h1>'.anteprimaTesto($disco["Text"],160).'</a>':'<div><img src="/immagini_r/default/'.$disco["img"].'.jpg" alt="'.s($disco["titolo"]).'"><h1>'.s($disco["artista"]).'<div>'.s($disco["titolo"]).', '.$disco["anno"].'</div></h1><br><a href="http://www.storiadellamusica.it/sys/admin/new_recensione_bozza.php" class="bottone small">Scrivi una recensione di questo disco</a></div>'
+	);
+	M::carica($contenitore,
+		"SELECT id_user,text,username FROM sdmt_comments JOIN phpbb_users ON user_id=ID_user WHERE type='d' AND ID_obj={$disco["idc"]} ORDER BY ID DESC",
+		"<div class='commentoclassifica'><a href='{linka,u{username}}'><span class='avatar' style='background:url({img,u,50,{id_user}})'></span><strong>{username}</strong></a>{riformatta,{text}}</div>"
+	);
+}

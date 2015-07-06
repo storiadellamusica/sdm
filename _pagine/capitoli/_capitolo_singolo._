@@ -1,0 +1,31 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*! Caricamento dati e inizializzazione */
+$id=end($_PARAMETRI);
+$dati=db::query("SELECT ID as id,Titolo,(num+1)AS numero,Autore,Text,kws AS keywords,Mailto AS iscritti FROM sdmt_capitoli WHERE url LIKE '$id'")->riga();
+if(!$dati)require _404;
+$pag=explode(utf8("§"),utf8($dati["Text"]));
+$pagine_totali=count($pag);
+if($_NUMERO_PAGINA>$pagine_totali)require _404;
+M::accendi("tre_colonne");
+/*! Metadati e title */
+$titolo="Capitolo ".$dati["numero"]." - ".$dati["Titolo"].($pagine_totali>1?" - pagina $_NUMERO_PAGINA di ".$pagine_totali:"");
+M::titolo($titolo);
+M::descrizione($dati["Text"]);
+M::keyword($dati["keywords"]);
+M::immagine(img("c",400,$id));
+/*! Testo */
+$contenitore=M::carica(M::modulo("box",array("flag"=>"C","titolo"=>$titolo)),"<article class='corpo_capitolo'><h1>{$dati["numero"]} - {$dati["Titolo"]} ($_NUMERO_PAGINA/$pagine_totali)</h1><img src='".img("c",150,$id)."'>".riformatta($pag[$_NUMERO_PAGINA-1]).'</article>');
+M::modulo("navigatore",array("dove"=>$contenitore,"pagine_totali"=>$pagine_totali));
+M::carica($contenitore,"<div class='clearfix'></div>".M::modulo("twitta").M::modulo("facebook like"));
+/*! Potrebbero interessarti */
+M::carica(M::carica(_COLONNA2,'<h2>Potrebbero interessarti:</h2><div class="elencorecensioni"></div>'),
+	M::modulo("collegati",array("max"=>10,"id"=>$dati["id"],"keywords"=>$dati["Titolo"].",".str_replace(", ",",",$dati["keywords"])))
+	);
+/*! Tutti i capitoli */
+M::carica(M::carica(_COLONNA3,"<h2>Altri capitoli:</h2><div class='altricapitoli'></div>"),
+	"SELECT Titolo,(num+1)AS numero,url FROM sdmt_capitoli WHERE ID!={$dati["id"]} AND ID>".($dati["id"]-9)." ORDER BY ID LIMIT 16",
+	"<a href='{linka,c{url}}'>{numero} - <strong>{Titolo}</strong></a>");
+M::modulo ("call to action");
+M::modulo("box facebook");
+/*! Commenti */
+M::modulo("commenti",array("sezione"=>"c","id"=>$dati["id"],"iscritti"=>$dati["iscritti"],"titolo"=>$dati["Titolo"]));

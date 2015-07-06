@@ -1,0 +1,14 @@
+<?php
+function nome_genere($a){
+	$nomi=array("Non classificato","Indie Rock","Indie Pop","Songwriters","Metal/HC/Punk","Avant-Post Rock","Soundtracks","Pop","Elettronicae Grooves","World","Soul&Jazz","Classic, Psych e Wave","HipHop/R&B/Black"
+);
+	return $nomi[$a];
+}
+function url_genere($a){
+	$nomi=array("nessun_genere","indie_rock","indie_pop","cantautori","heavy_metal_hardcore_punk","avant_post_rock","colonne_sonore_soundtracks","pop-music","elettronica_grooves_dance","world_music","soul-jazz","classic_rock-psichedelia-wave","hiphop-rnb-black");
+	return $nomi[$a];
+}
+function url_genere_to_id($a){
+	$nomi=array("nessun_genere","indie_rock","indie_pop","cantautori","heavy_metal_hardcore_punk","avant_post_rock","colonne_sonore_soundtracks","pop-music","elettronica_grooves_dance","world_music","soul-jazz","classic_rock-psichedelia-wave","hiphop-rnb-black");
+	return array_search($a,$nomi);
+}

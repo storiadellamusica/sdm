@@ -1,0 +1,33 @@
+#stellevoto{
+	margin-right: 10px;
+	position: relative;
+	padding-bottom: 30px;
+	>span{
+		cursor: pointer;
+		display: inline-block;
+		width: 10px;
+		overflow: hidden;
+		font-family: EntypoRegular;
+		font-size: 20px;
+		line-height: 20px;
+		letter-spacing: -2px;
+		color: lighten(@testo,50%);
+		&.hover{
+			color: @arancio;
+		}
+	}
+	>span:nth-child(2n){
+		text-indent: -10px;
+	}
+	div{
+		display: none;
+		color:@testo;
+		position: absolute;
+		right: 0;
+		top: 30px;
+		strong{
+			font-size: 24px;
+			color: @arancio;
+		}
+	}
+}

@@ -1,0 +1,17 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+define("CAPITOLII_PER_PAGINA",11);
+$totali=db::query("SELECT COUNT(*) FROM sdmt_capitoli")->valore();
+$pagine_totali=ceil($totali/CAPITOLII_PER_PAGINA);
+if($pagine_totali<$_NUMERO_PAGINA)require _404;
+$titolo="Storia della musica (pagina ".$_NUMERO_PAGINA." di ".$pagine_totali.")";
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::keyword("storia musica, musica rock, musica pop, musica elettronica");
+M::descrizione("La Storia della musica rock, pop, elettronica gratis per voi online.");
+M::modulo("colonne standard");
+$contenitore=M::modulo("box",array("flag"=>"A","titolo"=>$titolo,"class"=>"elencocapitoli"));
+M::modulo("navigatore",array("dove"=>$contenitore,"pagine_totali"=>$pagine_totali));
+M::carica(
+	$contenitore,
+	"SELECT url,Titolo,Text,num,(num+1)AS numero FROM sdmt_capitoli ORDER BY num LIMIT ".(($_NUMERO_PAGINA-1)*CAPITOLII_PER_PAGINA).",".CAPITOLII_PER_PAGINA,
+	'<a href="{linka,c{url}}"><img src="{img,c,90,{url}}" alt="{s,{Titolo}}"><h1>{numero} - {s,{Titolo}}</h1>{Text,250}</a>');

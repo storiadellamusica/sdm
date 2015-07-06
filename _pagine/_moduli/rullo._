@@ -1,0 +1,17 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*
+
+	Modulo per l'inserimento del rullo dei 15 dischi migliori dell'anno
+	Richiede come parametri:
+	-	anno: l'anno da presentare
+	Accetta come parametri opzionali:
+	-	dove: un selettore TLAB per indicare in che punto della pagina inserire il rullo
+
+*/
+if(!isset($anno))$anno=$GLOBALS["_ANNO_CLASSIFICHE"];
+M::carica(
+	M::carica(
+		M::modulo("box",array("dove"=>isset($dove)?$dove:_CORPO,"flag"=>"R","titolo"=>"I migliori dischi del $anno","id"=>"rullo")),
+		"<div></div>"),
+	"SELECT url,Titolo_Disco,((voto+IFNULL(media,voto))/2) AS voto,IFNULL(numerovoti,0) AS numvoti FROM sdmt_recensioni LEFT JOIN (SELECT ID_obj,COUNT(value)AS numerovoti,AVG(value) AS media FROM sdmt_voti_new WHERE ID_user NOT IN("._CONFIG_VOTE_BAN_LIST.") GROUP BY ID_obj)AS sdmt_voti ON sdmt_voti.ID_obj=sdmt_recensioni.ID WHERE sdmt_recensioni.data_disco='$anno' AND active=1 ORDER BY voto DESC, numvoti DESC, data LIMIT 15",
+	'<a href="{linka,r{url}}"><img src="{img,r,120,{url}}" alt="{s,{Titolo_Disco}}" class="reflect"></a>');

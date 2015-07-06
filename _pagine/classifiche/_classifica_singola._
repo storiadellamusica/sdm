@@ -1,0 +1,21 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+define("DISCHI_PER_PAGINA",10);
+$anno=$_PARAMETRI[0];
+$totali=db::query("SELECT COUNT(*) FROM sdmt_recensioni WHERE active=1 AND data_disco=$anno ")->valore();
+$pagine_totali=ceil($totali/DISCHI_PER_PAGINA);
+if($pagine_totali<$_NUMERO_PAGINA)require _404;
+$titolo="Classifica dei migliori dischi del $anno (pagina ".$_NUMERO_PAGINA." di ".$pagine_totali.")";
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+M::modulo("rullo",array("anno"=>$anno));
+$contenitore=M::modulo("box",array("flag"=>"R","titolo"=>$titolo,"class"=>"elencorecensioni"));
+M::modulo("navigatore",array("dove"=>$contenitore,"pagine_totali"=>$pagine_totali));
+$posizione=($_NUMERO_PAGINA-1)*DISCHI_PER_PAGINA+1;
+function contatore(){
+	return $GLOBALS["posizione"]++;
+}
+M::carica(
+	$contenitore,
+	"SELECT sdmt_recensioni.Titolo_Disco,sdmt_recensioni.Etichetta,sdmt_recensioni.data_disco,sdmt_recensioni.text,sdmt_recensioni.url,sdml_artista.Artista AS nome_artista,((voto+IFNULL(media,voto))/2) AS voto,IFNULL(numerovoti,0) AS numvoti FROM sdmt_recensioni LEFT JOIN (SELECT ID_obj,COUNT(value)AS numerovoti,AVG(value) AS media FROM sdmt_voti_new WHERE ID_user NOT IN("._CONFIG_VOTE_BAN_LIST.") GROUP BY ID_obj)AS sdmt_voti ON sdmt_voti.ID_obj=sdmt_recensioni.ID LEFT JOIN sdml_artista ON sdml_artista.ID=sdmt_recensioni.Artista WHERE sdmt_recensioni.data_disco='$anno' AND active=1 ORDER BY voto DESC, numvoti DESC, data LIMIT ".(($_NUMERO_PAGINA-1)*DISCHI_PER_PAGINA).",".DISCHI_PER_PAGINA,
+	'<a href="{linka,r{url}}"><img src="{img,r,90,{url}}" alt="{s,{Titolo_Disco}}">{stelle,{voto},0}<h2>{contatore,x}. {s,{nome_artista}}<div>{s,{Titolo_Disco}} ({s,{Etichetta}} {data_disco})</div></h2>{text,160}</a>');

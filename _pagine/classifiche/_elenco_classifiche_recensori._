@@ -1,0 +1,16 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+define("CLASSIFICHE_PER_PAGINA",11);
+$totali=db::query("SELECT COUNT(DISTINCT anno) FROM sdmt_classifica_anno")->valore();
+$pagine_totali=ceil($totali/CLASSIFICHE_PER_PAGINA);
+if($pagine_totali<$_NUMERO_PAGINA)require _404;
+$titolo="Classifiche rock, pop, elettronica".($pagine_totali>1?" (pagina ".$_NUMERO_PAGINA." di ".$pagine_totali.")":"");
+M::accendi("tre_colonne");
+M::titolo($titolo);
+M::modulo("colonne standard");
+$contenitore=M::modulo("box",array("flag"=>"C","titolo"=>"Le classifiche dei recensori","class"=>"elencoclassifiche"));
+M::modulo("navigatore",array("dove"=>$contenitore,"pagine_totali"=>$pagine_totali));
+foreach(db::query("SELECT anno FROM sdmt_classifica_anno WHERE anno<2015 GROUP BY anno ORDER BY anno DESC LIMIT ".(($_NUMERO_PAGINA-1)*CLASSIFICHE_PER_PAGINA).",".CLASSIFICHE_PER_PAGINA)->righe() as $riga)
+	M::carica(
+		M::carica($contenitore,"<a href='/classifiche/recensori/{$riga["anno"]}/'><strong>Classifica {$riga["anno"]}</strong></a>"),
+		"SELECT sdmt_recensioni.url,sum(sdmt_classifica_anno.voto) AS tot FROM sdmt_classifica_anno JOIN sdmt_recensioni ON sdmt_recensioni.ID=sdmt_classifica_anno.recensione_id where anno={$riga["anno"]} GROUP BY recensione_id ORDER BY tot DESC LIMIT 10",
+		'<img src="{img,r,120,{url}}">');

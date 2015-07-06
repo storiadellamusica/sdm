@@ -1,0 +1,11 @@
+<? // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+function spotyplay($artista,$album){
+	return "";
+	$url='http://ws.spotify.com/search/1/album.json?q=artist:"'.urlencode($artista).'"+album:"'.urlencode($album).'"';
+	if(!$uri=DB::query("SELECT uri FROM _spotify_cache WHERE url='".addslashes($url)."'")->valore()){
+		$spotify=@json_decode(file_get_contents($url))->albums;
+		$uri=count($spotify)?$spotify[0]->href:"";
+		if(strlen($uri))DB::query("INSERT INTO _spotify_cache VALUES ('".addslashes($url)."',NOW(),'".addslashes($uri)."') ON DUPLICATE KEY UPDATE updated=NOW(),uri=VALUES(URI)");
+	}
+	return strlen($uri)?'<iframe src="https://embed.spotify.com/?uri='.$uri.'" width="456" height="80" frameborder="0" allowtransparency="true" class="spotyframe" style="width:456px !important"></iframe>':"";
+}

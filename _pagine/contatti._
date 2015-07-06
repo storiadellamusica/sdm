@@ -1,0 +1,26 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+M::accendi("tre_colonne");
+M::titolo("Contatti");
+M::modulo("colonne standard");
+if(isset($_POST["mail"])){
+	$destinatari=array(
+		"a"=>"Admin Storiadellamusica.it <admin@storiadellamusica.it>",
+		"b"=>"Admin Storiadellamusica.it <admin@storiadellamusica.it>",
+		"c"=>"Admin Storiadellamusica.it <admin@storiadellamusica.it>",
+		"d"=>"Admin Storiadellamusica.it <admin@storiadellamusica.it>, Press Storiadellamusica.it <press@storiadellamusica.it>"
+	);
+	if($_POST["website"]=="http://"&&isset($destinatari[$_POST["oggetto"]])) //misura antispam
+		M::modulo("mailto",array("oggetto"=>"Storiadellamusica.it Comunicazione","destinatario"=>$destinatari[$_POST["oggetto"]],"testo"=>"<strong>Nuovo messaggio da ".entita($_POST["nome"])." (<a href='mailto:".entita($_POST["mail"])."'>".entita($_POST["mail"])."</a>)</strong>\n".entita($_POST["messaggio"])));
+	M::carica(M::modulo("box",array("class"=>"form_contatti","flag"=>"c","titolo"=>"Contatti")),"<br>Grazie per averci scritto! Ti risponderemo appena possibile.<br><br>");
+}else
+M::carica(M::modulo("box",array("class"=>"form_contatti","flag"=>"c","titolo"=>"Contatti")),"<form method='post' action='/"._URL."'><p>Puoi contattarci compilando questo modulo. Ti risponderemo appena possibile, grazie!</p><label for='form_oggetto'>Oggetto: </label><select name='oggetto' id='form_oggetto'><option value='a'>Richiesta Collaborazione</option><option value='b'>Informazioni Generali</option><option value='c'>Segnalazione Errori</option><option value='d'>Segnalazione Promo, Artisti e Label</option></select><div class='clearfix'></div><label for='form_nome'>Il tuo nome: </label><input type='text' name='nome' id='form_nome' value=''><input type='text' name='website' id='website' value='http://'><div class='clearfix'></div><label for='form_mail'>Il tuo indirizzo e-mail: </label><input type='text' name='mail' id='form_mail' value=''><div class='clearfix'></div><textarea name='messaggio' rows='6'></textarea><br><input type='submit' class='bottone' value='Invia messaggio'></form>");
+M::carica(M::modulo("box",array("class"=>"contatti","flag"=>"c","titolo"=>"Promo e materiale da recensire")),"<p>&Egrave; possibile spedire dischi da recensire all'indirizzo:</p>
+<p class='indirizzo'>Matteo Castello - Storiadellamusica<br>
+Regione Saraillon 26 Aosta (AO) 11100</p>
+<p class='hyphenate'><strong>ATTENZIONE</strong>: si prendono in considerazione soltanto dischi \"fisici\" spediti all'indirizzo qui sopra. Evitare di mandare link per download o ascolti sul web. Si prega di inviare soltanto materiale pubblicato nell'anno in corso. Ulteriore materiale promo di anni precedenti non verrà preso in considerazione per ragioni di tempo ed energie. Fanno eccezione ristampe \"eccezionali\" per le quali però occorre concordare l'interesse con il responsabile promo (<a href='mailto:promo@storiadellamusica.it'>promo@storiadellamusica.it</a>). Si precisa di contattare la presente mail solo per questa richiesta. Per ogni altra occorre compilare il form di contatto in questa pagina.</p>
+<p class='hyphenate'>Per motivi di energie, opportunità e spazio non si garantisce la recensione a tutti i dischi che arrivano, ma soltanto a quelli più meritevoli, interessanti o importanti. Si assicura però che almeno un ascolto viene dedicato a tutto ciò che viene spedito.</p>");
+M::carica(M::modulo("box",array("class"=>"contatti","flag"=>"s","titolo"=>"Sede")),"
+<p class='indirizzo'>Redazione Storiadellamusica c/o WebDesignGenova<br>
+Piazza San Matteo 17/7 - 16123 Genova</p>
+<p>P.IVA 01624330997</p>
+<p>e-mail: <a href='mailto:admin@storiadellamusica.it'>admin@storiadellamusica.it</a></p>");

@@ -1,0 +1,20 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+define("LIMITE",100);
+function q($a){$qq=addslashes($_GET["q"]);return " ($a LIKE '$qq%' OR $a LIKE '% $qq%') ";}
+$nome=array("x"=>"negli artisti","r"=>"nelle recensioni","a"=>"negli articoli");
+$queries=array(
+"x"=>"SELECT url,CONCAT('<strong>',Artista,'</strong>') AS titolo,'x' AS tipo FROM sdml_artista WHERE ".q("Artista")." GROUP BY Artista ORDER BY Artista",
+"r"=>"SELECT sdmt_recensioni.url,CONCAT('<strong>',sdml_artista.Artista,'</strong>',sdmt_recensioni.Titolo_disco) AS titolo,'r' AS tipo FROM sdmt_recensioni LEFT JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE sdmt_recensioni.active=1 AND (".q("sdmt_recensioni.Titolo_disco")." OR ".q("sdml_artista.Artista").") ORDER BY Data DESC",
+"a"=>"SELECT sdmt_articoli.url,CONCAT('<strong>',sdmt_articoli.Titolo,'</strong>') AS titolo,'a' AS tipo FROM sdmt_articoli LEFT JOIN sdml_artista ON sdmt_articoli.Artista=sdml_artista.ID WHERE active=1 AND (".q("sdmt_articoli.Titolo")." OR ".q("sdml_artista.Artista").") ORDER BY Data DESC");
+if(isset($nome[$_GET["k"]])){
+	$dove=" ".$nome[$_GET["k"]];
+	$query=$queries[$_GET["k"]];
+}else{
+	$dove="";
+	$query="SELECT * FROM (SELECT * FROM ({$queries["x"]}) AS x UNION ({$queries["r"]}))AS xr UNION ({$queries["a"]}) ORDER BY titolo";
+}
+M::accendi("mono");
+M::titolo("Cerca ".entita($_GET["q"].$dove));
+M::carica(M::carica(M::modulo("box",array("flag"=>"C","titolo"=>"Cerca ".entita($_GET["q"]).$dove,"class"=>"boxcerca tuttapagina")),"<p>Risultati della ricerca di <em>".entita($_GET["q"])."</em>$dove:</p><div class='cercarisultati'></div>"),
+	$query." LIMIT ".LIMITE,
+	'<a href="{linka,{tipo}{url}}"><img src="{img,{tipo},50,{url}}">{titolo}</a>');

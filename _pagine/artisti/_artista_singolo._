@@ -1,0 +1,27 @@
+<?php // Author: Stefano Peloso (http://stefano.io) - Released under CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+/*! Caricamento dati e inizializzazione */
+$id=end($_PARAMETRI);
+$dati=db::query("SELECT artista,biografia,ID AS id FROM sdml_artista WHERE url LIKE '$id'")->riga();
+if(!$dati)require _404;
+M::accendi("tre_colonne");
+M::modulo("colonne standard");
+/*! Metadati e title */
+M::titolo($dati["artista"]);
+M::descrizione($dati["biografia"]);
+M::keyword($dati["artista"]);
+M::immagine(img("x",400,$id));
+/*! Video */
+$video="";
+foreach(db::query("SELECT youtube FROM sdmt_recensioni WHERE Artista={$dati["id"]}")->righe()as $v)
+	$video.=",".$v["youtube"];
+$video=explode(",",$video);
+foreach($video as $k=>$v)
+	if(empty($v))unset($video[$k]);
+if(count($video))M::modulo("youtube",array("video"=>$video,"dove"=>M::modulo("box",array("flag"=>"V","titolo"=>"Video","class"=>"video"))));
+/*! Descrizione artista */
+M::carica(M::modulo("box",array("flag"=>"A","titolo"=>$dati["artista"])),"<article class='corpo_artista'><h1>{$dati["artista"]}</h1><img src='".img("x",150,$id)."'>".riformatta($dati["biografia"]).(empty($dati["biografia"])?"<div class='nobio'>Non c'&egrave; ancora una biografia per <strong>{$dati["artista"]}</strong>.<br> Perch&eacute; non la scrivi tu?<br> <a href='/scrivi/biografia/$id' class='bottone'>Scrivi una biografia</a></div>":"")."<div class='clearfix'></div>".M::modulo("twitta").M::modulo("facebook like").'</article>');
+/*! Recensioni artista */
+M::carica(
+	M::modulo("box",array("flag"=>"R","titolo"=>"Dischi di ".$dati["artista"],"class"=>"elencorecensioni")),
+	"SELECT sdml_artista.Artista,sdmt_recensioni.voto,sdmt_recensioni.Titolo_Disco,sdmt_recensioni.Etichetta,sdmt_recensioni.data_disco,sdmt_recensioni.Text,sdmt_recensioni.ID,sdmt_recensioni.url FROM sdmt_recensioni JOIN sdml_artista ON sdmt_recensioni.Artista=sdml_artista.ID WHERE active=1 AND sdmt_recensioni.Artista={$dati["id"]} ORDER BY data_disco",
+	'<a href="{linka,r{url}}"><img src="{img,r,90,{url}}" alt="{s,{Titolo_Disco}}">{stelle,{voto}}<h1>{s,{Artista}}<div>{s,{Titolo_Disco}} ({s,{Etichetta}} {data_disco})</div></h1>{Text,160}</a>');
